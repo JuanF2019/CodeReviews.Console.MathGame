@@ -1,6 +1,4 @@
-﻿using System.Reflection.PortableExecutable;
-
-bool exitGame = false;
+﻿bool exitGame = false;
 string? input;
 List<int> scores = new List<int>();
 const int NumberOfQuestionsPerGame = 5;
@@ -11,11 +9,14 @@ do
 {
     Console.WriteLine("Main menu");
     Console.WriteLine("Please select a game mode or type \"exit\" to close the app:");
-    Console.WriteLine("1. Sum game");
+    Console.WriteLine("1. Addition game");
+    Console.WriteLine("2. Substraction game");
+    Console.WriteLine("3. Multiplication game");
+    Console.WriteLine("4. Division game");
 
     bool validSelection;
     do
-    {        
+    {
         input = Console.ReadLine();
         bool inputNotEmpty = input != null && input.Length > 0;
         validSelection = true;
@@ -23,6 +24,7 @@ do
         if (inputNotEmpty)
         {
             string userSelection = input.ToLower();
+            int score;
             switch (userSelection)
             {
                 case "exit":
@@ -30,7 +32,31 @@ do
                     break;
                 case "1":
                     Console.Clear();
-                    int score = sumGame();
+                    score = game(Operations.ADDITION);
+                    scores.Add(score);
+                    Console.WriteLine("Press enter to continue...");
+                    Console.ReadLine();
+                    Console.Clear();
+                    break;
+                case "2":
+                    Console.Clear();
+                    score = game(Operations.SUBSTRACTION);
+                    scores.Add(score);
+                    Console.WriteLine("Press enter to continue...");
+                    Console.ReadLine();
+                    Console.Clear();
+                    break;
+                case "3":
+                    Console.Clear();
+                    score = game(Operations.MULTIPLICATION);
+                    scores.Add(score);
+                    Console.WriteLine("Press enter to continue...");
+                    Console.ReadLine();
+                    Console.Clear();
+                    break;
+                case "4":
+                    Console.Clear();
+                    score = game(Operations.DIVISION);
                     scores.Add(score);
                     Console.WriteLine("Press enter to continue...");
                     Console.ReadLine();
@@ -45,21 +71,64 @@ do
     } while (!validSelection);
 } while (!exitGame);
 
-static int sumGame()
+static List<int> getFactors(int num)
+{
+    List<int> factors = new List<int>();
+
+    for (int i = 1; i <= num; i++)
+    {
+        if (num % i == 0)
+        {
+            factors.Add(i);
+        }
+    }
+
+    return factors;
+}
+
+static int game(Operations operation)
 {
     int score = 0;
-    Random random = new Random();
-
+    char operationSymbol = ((char)operation);
     int minNumber = 1;
     int maxNumber = 9;
 
-    for(int i = 0; i < NumberOfQuestionsPerGame; i++)
-    {
-        int number1 = random.Next(minNumber, maxNumber+1);
-        int number2 = random.Next(minNumber,maxNumber+1);
-        int expectedAnswer = number1 + number2;
+    Random random = new Random();
 
-        Console.WriteLine($"Question {i+1}/{NumberOfQuestionsPerGame}\nWhat is {number1} + {number2} ?");
+    for (int i = 0; i < NumberOfQuestionsPerGame; i++)
+    {
+        int number1 = random.Next(minNumber, maxNumber + 1);
+        int number2;
+        int expectedResult;
+        switch (operation)
+        {
+            case Operations.ADDITION:
+                number2 = random.Next(minNumber, maxNumber + 1);
+                expectedResult = number1 + number2;
+                break;
+            case Operations.SUBSTRACTION:
+                number2 = random.Next(minNumber, maxNumber + 1);
+                expectedResult = number1 - number2;
+                break;
+            case Operations.MULTIPLICATION:
+                number2 = random.Next(minNumber, maxNumber + 1);
+                expectedResult = number1 * number2;
+                break;
+            case Operations.DIVISION:
+                List<int> number1Factors = getFactors(number1);
+                int number2PositionInFactors = random.Next(0, number1Factors.Count);
+                number2 = number1Factors[number2PositionInFactors];
+
+                expectedResult = number1 / number2;
+                break;
+            default:
+                number1 = 1;
+                number2 = 1;
+                expectedResult = 0;
+                break;
+        }
+
+        Console.WriteLine($"Question {i + 1}/{NumberOfQuestionsPerGame}\nWhat is {number1} {operationSymbol} {number2} ?");
 
         string input = Console.ReadLine();
         int userAnswer;
@@ -70,22 +139,18 @@ static int sumGame()
             input = Console.ReadLine();
         }
 
-        if(userAnswer == expectedAnswer)
+        if (userAnswer == expectedResult)
         {
             score += ScorePerQuestion;
         }
         Console.Clear();
     }
-    Console.WriteLine($"Your score was: {score}/{MaximumScore}");
+
+    Console.WriteLine($"Your score was {score}/{MaximumScore}");
+
     return score;
 }
-
 enum Operations
 {
-    ADDITION,SUBSTRACTION,MULTIPLICATION,DIVISION
+    ADDITION = '+', SUBSTRACTION = '-', MULTIPLICATION = '*', DIVISION = '/'
 }
-/*
- * Ciclo para la selección de la operación
- * For para las preguntas
- * 
- */
